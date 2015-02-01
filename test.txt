@@ -1,0 +1,7 @@
+var
+c : : : :integer;
+begin
+a:=b+c;
+	d := e + f;
+	k = 1;
+end.
