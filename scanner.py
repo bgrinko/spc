@@ -1,42 +1,10 @@
-# Copyright (C) Basil Grinko, 2015
-
-import sys
-from error import Error
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
 
 __author__ = 'Basil Grinko'
 
-C_ERROR_MESSAGE = {
-    'UnknownChar': 'Illegal character in input file',
-    'WrongInteger': 'Syntax error in Integer number',
-    'WrongReal': 'Syntax error in real number',
-    'WrongStr': 'Unterminated string',
-    'UoF': 'Unexpected end of file',
-    'ExprEx': 'Expression expected'
-}
-C_KEY_WORDS = [
-    'integer', 'real', 'shl', 'and',  'shr', 'array', 'string', 'asm', 'for',
-    'then', 'forward', 'not', 'to', 'begin', 'function', 'type', 'case', 'goto',
-    'of', 'unit', 'const', 'if', 'or', 'until', 'uses', 'in', 'var',
-    'procedure', 'do', 'program', 'while', 'downto', 'inline', 'with', 'else',
-    'record', 'xor', 'end', 'repeat', 'div', 'mod']
-C_OPERATIONS = {
-    '+': 'EAdd', '-': 'EMinus', '*': 'EMultiply',
-    '/': 'EDivided', '<': 'ELess', '>': 'EMore',
-    '<=': 'ELessOrEqual', '>=': 'EMoreOrEqual',
-    '=': 'EEqual', ':=': 'EAssign', '<>': 'ENotEqual',
-    '@': 'EAt', '^': 'ECap'
-}
-C_SEPARATORS = {
-    ';': 'ESemicolon', ',': 'EComma', ':': 'EColon',
-    '[': 'EOpenBracket', ']': 'ECloseBracket',
-    '(': 'EOpenParenthesis', ')': 'ECloseParenthesis',
-    '..': 'ETwoDots', '.': 'EDot'
-}
-
-
-class TokenAllTypes(object):
-    def __init__(self):
-        pass
+from error import *
+from token_type_gen import TokenGenerator
 
 
 class Token:
@@ -68,10 +36,9 @@ class Token:
 
 
 class ReadBuffer:
-    __buffer_chars = []
-
     def __init__(self, file_name):
         self.__file = open(file_name, 'r')
+        self.__buffer_chars = []
         self.__buffer_read = False
         self.__buffer_position = -1
         self.__buffer_read_position = 0
@@ -91,6 +58,7 @@ class ReadBuffer:
             self.__buffer_position += 1
             if result == '':
                 self.__end_of_file = True
+                self.__file.close()
             self.__buffer_chars.append(result)
         else:
             result = self.__buffer_chars[self.__buffer_position]
@@ -106,23 +74,13 @@ class ReadBuffer:
 
 
 class Scanner:
-    __char = ''
-    __token_types = dict()
-
     def __init__(self, file_name):
         self.__file_name = file_name
         self.__line = 1
         self.__position = 0
+        self.__char = ''
+        self.__token_types = TokenGenerator()
         self.__buffer = ReadBuffer(file_name)
-        for v in C_KEY_WORDS:
-            self.__token_types[v] = type('EK' + v[0].upper() + v[1:], (TokenAllTypes, ), {})
-        for k, v in C_OPERATIONS.iteritems():
-            self.__token_types[k] = type(v, (TokenAllTypes, ), {})
-        for k, v in C_SEPARATORS.iteritems():
-            self.__token_types[k] = type(v, (TokenAllTypes, ), {})
-        self.__token_types['t_integer'] = type('EInteger', (TokenAllTypes, ), {})
-        self.__token_types['t_real'] = type('EReal', (TokenAllTypes, ), {})
-        self.__token_types['t_char'] = type('EReal', (TokenAllTypes, ), {})
 
     def __iter__(self):
         return self
@@ -192,13 +150,7 @@ class Scanner:
         return self.__buffer.eof
 
     class TokenValue(object):
-        _instance = None
         value = ''
-
-        def __new__(cls, *args, **kwargs):
-            if not cls._instance:
-                cls._instance = super(TokenValue, cls).__new__(cls, *args, **kwargs)
-            return cls._instance
 
     def __read_operation_token(self):
         value = ''
@@ -206,43 +158,46 @@ class Scanner:
         if self.__is_operation():
             self.__read()
             if self.__is_operation():
-                if value + self.__char in C_OPERATIONS.keys():
-                    return Token(self.__token_types[value + self.__char], self.__line, self.__position, value + self.__char)
+                if self.__token_types.operation_exist(value + self.__char):
+                    return Token(self.__token_types.get_token(value + self.__char),
+                                 self.__line, self.__position, value + self.__char)
                 else:
                     self.__step_back(2)
                     self.__read()
             else:
                 self.__step_back(2)
                 self.__read()
-                if value in C_OPERATIONS.keys():
-                    return Token(self.__token_types[value], self.__line, self.__position, value)
+                if self.__token_types.operation_exist(value):
+                    return Token(self.__token_types.get_token(value), self.__line, self.__position, value)
         if self.__is_separator():
             self.__read()
             if self.__is_separator():
-                if value + self.__char in C_SEPARATORS.keys():
-                    return Token(self.__token_types[value + self.__char], self.__line, self.__position, value + self.__char)
+                if self.__token_types.separator_exist(value + self.__char):
+                    return Token(self.__token_types.get_token(value + self.__char),
+                                 self.__line, self.__position, value + self.__char)
             else:
                 self.__step_back()
-                if value in C_SEPARATORS.keys():
-                    return Token(self.__token_types[value], self.__line, self.__position, value)
+                if self.__token_types.separator_exist(value):
+                    return Token(self.__token_types.get_token(value), self.__line, self.__position, value)
         raise Error(self.__line, self.__position, C_ERROR_MESSAGE['ExprEx'])
 
     def __read_identifier_token(self):
         value = ''
+        result = None
         while self.__is_latter() or self.__is_underscore() or self.__is_num():
             value += self.__char
             if self.__is_latter() or self.__is_underscore() or self.__is_num():
-                if value.lower() in C_KEY_WORDS:
-                    const_type = type('E' + value[0].upper() + value[1:], (TokenAllTypes, ), {})
+                if self.__token_types.key_word_exist(value.lower()):
+                    const_type = self.__token_types.get_token(value.lower())
                 else:
-                    const_type = type('EId', (TokenAllTypes, ), {})
+                    const_type = self.__token_types.get_token('t_id')
                 result = Token(const_type, self.__line, self.__position, value)
             self.__read()
         self.__step_back()
         return result
 
     def __read_number_token(self):
-        const_type = self.__token_types['t_integer']
+        const_type = self.__token_types.get_token('t_integer')
         value = self.TokenValue
         value.value = ''
 
@@ -261,13 +216,13 @@ class Scanner:
             self.__step_back(2)
             if self.__is_dot():
                 return Token(const_type, self.__line, self.__position, value.value)
-            const_type = self.__token_types['t_real']
+            const_type = self.__token_types.get_token('t_real')
             value.value += self.__read()
             self.__read()
             if not read_nums():
                 raise Error(self.__line, self.__position, C_ERROR_MESSAGE['WrongInteger'])
         if self.__is_e():
-            const_type = self.__token_types['t_real']
+            const_type = self.__token_types.get_token('t_real')
             value.value += self.__char
             self.__read()
             if self.__is_char('+') or self.__is_char('-'):
@@ -276,7 +231,7 @@ class Scanner:
             if not read_nums():
                 raise Error(self.__line, self.__position, C_ERROR_MESSAGE['WrongReal'])
         if not (self.__is_operation() or self.__is_separator() or self.__is_space()):
-            if const_type == self.__token_types['t_real']:
+            if const_type == self.__token_types.get_token('t_real'):
                 raise Error(self.__line, self.__position, C_ERROR_MESSAGE['WrongReal'])
             else:
                 raise Error(self.__line, self.__position, C_ERROR_MESSAGE['WrongInteger'])
@@ -285,8 +240,7 @@ class Scanner:
         return result
 
     def __read_string_token(self):
-        const_type = type('EChar', (TokenAllTypes, ), {})
-        read_count_char = 0
+        const_type = self.__token_types.get_token('t_char')
         value = self.TokenValue
         value.value = ''
 
@@ -306,12 +260,12 @@ class Scanner:
         if read_count_char == -1:
             raise Error(self.__line, self.__position, C_ERROR_MESSAGE['WrongStr'])
         if read_count_char > 1 or read_count_char == 0:
-            const_type = type('EString', (TokenAllTypes, ), {})
+            const_type = self.__token_types.get_token('t_string')
         return Token(const_type, self.__line, self.__position, value.value)
 
     def __read_token(self):
         self.__read()
-        const_type = type('EEoF', (TokenAllTypes, ), {})
+        const_type = self.__token_types.get_token('t_eof')
         if self.__is_end_of_file():
             self.__current_token = Token(const_type, self.__line, self.__position, 'End of File')
             return False

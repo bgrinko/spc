@@ -12,7 +12,7 @@ SPC_VERSION = "0.01"
 
 def main():
     if len(sys.argv) < 3:
-        print "Hello to Simple Pascal Compiler use Python"
+        print "Hello to Simple Pascal Compiler"
         print "Version: " + SPC_VERSION
         print "/P FileName -- Parser Test"
         return

@@ -1,7 +1,12 @@
 var
-c : : : :integer;
+    c : integer;
+    a : array [1..10] of char;
 begin
-a:=b+c;
+    a:=b+c;
 	d := e + f;
 	k = 1;
+	m = 12345345;
+	e = 123423.1;
+	c = '123c"'''
+	(2 + 2) = 4
 end.

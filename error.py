@@ -1,8 +1,16 @@
-# Copyright (C) Basil Grinko, 2015
-
-import sys
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
 
 __author__ = 'Basil Grinko'
+
+C_ERROR_MESSAGE = {
+    'UnknownChar': 'Illegal character in input file',
+    'WrongInteger': 'Syntax error in Integer number',
+    'WrongReal': 'Syntax error in Real number',
+    'WrongStr': 'Unterminated String',
+    'UoF': 'Unexpected End of File',
+    'ExprEx': 'Expression expected'
+}
 
 
 class Error(Exception):
