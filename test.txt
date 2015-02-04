@@ -2,7 +2,7 @@ var
     c : integer;
     a : array [1..10] of char;
 begin
-    a:=b+c;
+    a := b+c;
 	d := e + f;
 	k = 1;
 	m = 12345345;
