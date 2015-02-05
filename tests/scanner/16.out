@@ -1,0 +1,14 @@
+1	5	KEYWORD		begin
+3	3	KEYWORD		end
+5	8	KEYWORD		function
+7	3	KEYWORD		var
+9	1	IDENTIF		a
+9	2	SEPARAT		,
+9	4	IDENTIF		b
+9	5	SEPARAT		,
+9	7	IDENTIF		c
+9	8	SEPARAT		,
+9	10	IDENTIF		d
+9	11	SEPARAT		,
+9	13	IDENTIF		e
+Error! Line: 11 Pos: 2 Msg: Expression expected

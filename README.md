@@ -1,1 +1,1 @@
-# spc
+# Simple Pascal Compiler

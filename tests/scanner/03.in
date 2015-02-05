@@ -1,0 +1,6 @@
+var
+    a, b, c: integer;
+begin
+    e = 12;
+    c = 1.2;
+end.

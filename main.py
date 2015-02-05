@@ -2,8 +2,10 @@
 # -*- coding: UTF-8 -*-
 
 import sys
-from scanner import Scanner
-from error import Error
+
+from spc.scanner import Scanner
+from spc.error import Error
+
 
 __author__ = 'Basil Grinko'
 
@@ -14,13 +16,13 @@ def main():
     if len(sys.argv) < 3:
         print "Hello to Simple Pascal Compiler"
         print "Version: " + SPC_VERSION
-        print "/P FileName -- Parser Test"
+        print "/l <file_name> -- lexical analysis"
         return
     try:
-        if sys.argv[1] == '/P':
+        if sys.argv[1].lower() == '/l':
             m_scanner = Scanner(sys.argv[2])
             for token in m_scanner:
-                print str(token.get_line) + ' ' + str(token.get_position) + ' ' + str(token.get_value) + ' --> ' + str(token.get_type_name)
+                token.print_token()
     except Error as e:
         print e.__str__()
 
