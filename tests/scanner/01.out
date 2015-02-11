@@ -1,4 +1,4 @@
-1	5	KEYWORD		begin
-3	3	KEYWORD		end
-3	4	SEPARAT		.
-3	6	EOF		End of File
+1	5	NONE		begin
+3	3	NONE		end
+3	4	NONE		.
+3	6	NONE		End of File

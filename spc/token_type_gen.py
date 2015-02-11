@@ -23,10 +23,31 @@ C_SEPARATORS = {
     '..': 'ESTwoDots', '.': 'ESDot'
 }
 
+NONE = 0
+KEYWORD = 1
+OPERAT = 2
+SEPARAT = 3
+INTEGER = 4
+REAL = 5
+CHAR = 6
+STRING = 7
+IDENTIF = 8
+EOF = 9
+
 
 class TokenAllTypes(object):
+    e_type = NONE
+    type_string = 'NONE'
+
     def __init__(self):
-        type_string = 'NONE'
+        pass
+
+
+def is_type(self, other):
+    if self.e_type == other:
+        return True
+    else:
+        return False
 
 
 class TokenGenerator(object):
@@ -37,17 +58,18 @@ class TokenGenerator(object):
             cls._instance = super(TokenGenerator, cls).__new__(cls, *args, **kwargs)
             cls._token_types = dict()
             for v in C_KEY_WORDS:
-                cls._token_types[v] = type('EK' + v[0].upper() + v[1:], (TokenAllTypes, ), {'type_string': 'KEYWORD'})
+                cls._token_types[v] = type(
+                    'EK' + v[0].upper() + v[1:], (TokenAllTypes, ), {'e_type': KEYWORD})
             for k, v in C_OPERATIONS.iteritems():
-                cls._token_types[k] = type(v, (TokenAllTypes, ), {'type_string': 'OPERAT'})
+                cls._token_types[k] = type(v, (TokenAllTypes, ), {'e_type': OPERAT})
             for k, v in C_SEPARATORS.iteritems():
-                cls._token_types[k] = type(v, (TokenAllTypes, ), {'type_string': 'SEPARAT'})
-            cls._token_types['t_integer'] = type('ETInteger', (TokenAllTypes, ), {'type_string': 'INTEGER'})
-            cls._token_types['t_real'] = type('ETReal', (TokenAllTypes, ), {'type_string': 'REAL'})
-            cls._token_types['t_char'] = type('ETChar', (TokenAllTypes, ), {'type_string': 'CHAR'})
-            cls._token_types['t_string'] = type('ETString', (TokenAllTypes, ), {'type_string': 'STRING'})
-            cls._token_types['t_id'] = type('EId', (TokenAllTypes, ), {'type_string': 'IDENTIF'})
-            cls._token_types['t_eof'] = type('EEoF', (TokenAllTypes, ), {'type_string': 'EOF'})
+                cls._token_types[k] = type(v, (TokenAllTypes, ), {'e_type': SEPARAT})
+            cls._token_types['t_integer'] = type('ETInteger', (TokenAllTypes, ), {'e_type': INTEGER})
+            cls._token_types['t_real'] = type('ETReal', (TokenAllTypes, ), {'e_type': REAL})
+            cls._token_types['t_char'] = type('ETChar', (TokenAllTypes, ), {'e_type': CHAR})
+            cls._token_types['t_string'] = type('ETString', (TokenAllTypes, ), {'e_type': STRING})
+            cls._token_types['t_id'] = type('EId', (TokenAllTypes, ), {'e_type': IDENTIF})
+            cls._token_types['t_eof'] = type('EEoF', (TokenAllTypes, ), {'e_type': EOF})
         return cls._instance
 
     @staticmethod

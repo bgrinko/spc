@@ -4,7 +4,7 @@
 __author__ = 'Basil Grinko'
 
 from spc.error import *
-from spc.token_type_gen import TokenGenerator
+from spc.token_type_gen import *
 
 
 class Token:
@@ -150,8 +150,11 @@ class Scanner:
     def __is_close_bracket(self):
         return self.__char in [')', ']']
 
+    def __is_tab_return(self):
+        return self.__char in ['\t', '\r', '\n']
+
     def __is_space(self):
-        return self.__char in [' ', chr(13), chr(10), chr(9)]
+        return self.__char == ' '
 
     def __is_end_of_file(self):
         return self.__buffer.eof
@@ -237,8 +240,9 @@ class Scanner:
                 self.__read()
             if not read_nums():
                 raise Error(self.__line, self.__position, C_ERROR_MESSAGE['WrongReal'])
-        if not (self.__is_operation() or self.__is_separator() or self.__is_space() or self.__is_end_of_file()):
-            if const_type == self.__token_types.get_token('t_real'):
+        if not (self.__is_operation() or self.__is_separator()
+                or self.__is_space() or self.__is_tab_return() or self.__is_end_of_file()):
+            if is_type(const_type, REAL):
                 raise Error(self.__line, self.__position, C_ERROR_MESSAGE['WrongReal'])
             else:
                 raise Error(self.__line, self.__position, C_ERROR_MESSAGE['WrongInteger'])
@@ -255,11 +259,11 @@ class Scanner:
             result = 0
             rv = self.TokenValue
             while not (self.__is_single_quote() and not self.__is_double_quote()) \
-                    and not self.__is_space() and not self.__is_end_of_file():
+                    and not self.__is_tab_return() and not self.__is_end_of_file():
                 result += 1
                 rv.value += self.__char
                 self.__read()
-                if self.__is_space() or self.__is_end_of_file():
+                if self.__is_tab_return() or self.__is_end_of_file():
                     result = -1
             return result
 
@@ -277,7 +281,7 @@ class Scanner:
         if self.__is_end_of_file():
             self.__current_token = Token(const_type, self.__line, self.__position, 'End of File')
             return False
-        elif self.__is_space():
+        elif self.__is_space() or self.__is_tab_return():
             result = self.__read_token()
         elif self.__is_num():
             self.__current_token = self.__read_number_token()
