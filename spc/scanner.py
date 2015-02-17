@@ -300,3 +300,7 @@ class Scanner:
             return self.__current_token
         else:
             raise StopIteration
+
+    @property
+    def get_token(self):
+        return self.__current_token

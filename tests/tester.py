@@ -32,7 +32,7 @@ def main():
     for i in xrange(start_test, end_test + 1):
         try:
             print 'Run ' + tests_dir + ' test number: ' + ('{:0' + str(len(str(MAX_TESTS_COUNT))) + '}').format(i)
-            ans = subprocess.check_output(['python', '../main.py', '/l',
+            ans = subprocess.check_output(['python', '../main.py', sys.argv[1].lower(),
                                           tests_dir + '/' + ('{:0' + str(len(str(
                                               MAX_TESTS_COUNT))) + '}').format(i) + '.in'])
             open('scanner/' + ('{:0' + str(len(str(MAX_TESTS_COUNT))) + '}').format(i) + '.out', 'w').write(ans)

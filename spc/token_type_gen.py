@@ -96,4 +96,10 @@ class TokenGenerator(object):
         else:
             return False
 
+    def is_type(self, token, token_type):
+        if token_type in self._token_types.keys():
+            return self._token_types[token_type] == token
+        else:
+            return False
+
 
